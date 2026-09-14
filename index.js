@@ -3,6 +3,7 @@ const dotenv = require('dotenv');
 const cors = require('cors');
 const connectDB = require('./config/db');
 const authRoutes = require('./routes/authRoutes');
+const productRoutes = require('./routes/productRoutes');
 
 dotenv.config();
 connectDB();
@@ -14,6 +15,9 @@ app.use(express.json());
 
 // Auth Routes
 app.use('/api/auth', authRoutes);
+
+// Product Routes
+app.use('/api/products', productRoutes);
 
 app.get('/', (req, res) => {
     res.send('StockArt API is running...');
