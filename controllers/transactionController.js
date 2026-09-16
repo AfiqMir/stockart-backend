@@ -1,6 +1,56 @@
 const Transaction = require('../models/Transaction');
 const Product = require('../models/Product');
 
+const calculateTransactionDetail = async (detailBarang) => {
+  if (!Array.isArray(detailBarang) || detailBarang.length === 0) {
+    const error = new Error('Detail barang minimal berisi 1 produk');
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const calculatedDetailBarang = [];
+
+  for (const item of detailBarang) {
+    const product = await Product.findById(item.produk);
+
+    if (!product) {
+      const error = new Error('Produk tidak ditemukan');
+      error.statusCode = 404;
+      throw error;
+    }
+
+    const jumlah = Number(item.jumlah);
+
+    if (!Number.isInteger(jumlah) || jumlah < 1) {
+      const error = new Error('Jumlah produk harus berupa angka minimal 1');
+      error.statusCode = 400;
+      throw error;
+    }
+
+    const hargaSatuan = product.hargaJual;
+    const subtotal = jumlah * hargaSatuan;
+
+    calculatedDetailBarang.push({
+      produk: product._id,
+      namaProduk: product.nama,
+      kodeProduk: product.kodeProduk,
+      jumlah,
+      hargaSatuan,
+      subtotal,
+    });
+  }
+
+  const totalHarga = calculatedDetailBarang.reduce(
+    (total, item) => total + item.subtotal,
+    0
+  );
+
+  return {
+    detailBarang: calculatedDetailBarang,
+    totalHarga,
+  };
+};
+
 // GET /api/transactions
 exports.getTransactions = async (req, res) => {
   try {
@@ -48,59 +98,35 @@ exports.getTransactionById = async (req, res) => {
   }
 };
 
+// POST /api/transactions/draft
+exports.draftTransaction = async (req, res) => {
+  try {
+    const draft = await calculateTransactionDetail(req.body.detailBarang);
+
+    res.status(200).json({
+      success: true,
+      message: 'Draft transaksi berhasil dihitung',
+      data: draft,
+    });
+  } catch (error) {
+    res.status(error.statusCode || 400).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
 // POST /api/transactions
 exports.createTransaction = async (req, res) => {
   try {
-    const { detailBarang } = req.body;
-
-    if (!Array.isArray(detailBarang) || detailBarang.length === 0) {
-      return res.status(400).json({
-        success: false,
-        message: 'Detail barang minimal berisi 1 produk',
-      });
-    }
-
-    const calculatedDetailBarang = [];
-
-    for (const item of detailBarang) {
-      const product = await Product.findById(item.produk);
-
-      if (!product) {
-        return res.status(404).json({
-          success: false,
-          message: 'Produk tidak ditemukan',
-        });
-      }
-
-      const jumlah = Number(item.jumlah);
-
-      if (!Number.isInteger(jumlah) || jumlah < 1) {
-        return res.status(400).json({
-          success: false,
-          message: 'Jumlah produk harus berupa angka minimal 1',
-        });
-      }
-
-      const hargaSatuan = product.hargaJual;
-      const subtotal = jumlah * hargaSatuan;
-
-      calculatedDetailBarang.push({
-        produk: product._id,
-        jumlah,
-        hargaSatuan,
-        subtotal,
-      });
-    }
-
-    const totalHarga = calculatedDetailBarang.reduce(
-      (total, item) => total + item.subtotal,
-      0
+    const { detailBarang, totalHarga } = await calculateTransactionDetail(
+      req.body.detailBarang
     );
 
     const transaction = await Transaction.create({
       ...req.body,
       kasir: req.user?._id || req.body.kasir,
-      detailBarang: calculatedDetailBarang,
+      detailBarang,
       totalHarga,
     });
 
@@ -110,7 +136,7 @@ exports.createTransaction = async (req, res) => {
       data: transaction,
     });
   } catch (error) {
-    res.status(400).json({
+    res.status(error.statusCode || 400).json({
       success: false,
       message: 'Gagal membuat transaksi',
       error: error.message,
