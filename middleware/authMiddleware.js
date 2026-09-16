@@ -7,7 +7,7 @@ const protect = async (req, res, next) => {
 
   if (
     req.headers.authorization &&
-    req.headers.authorization.startsWith('Bearer')
+    /^Bearer\s+\S+$/.test(req.headers.authorization)
   ) {
     try {
       // Ambil token dari header Authorization: Bearer <TOKEN>
@@ -18,6 +18,10 @@ const protect = async (req, res, next) => {
 
       // Ambil data user dari database (tanpa password)
       req.user = await User.findById(decoded.id).select('-password');
+
+      if (!req.user) {
+        return res.status(401).json({ message: 'User tidak ditemukan' });
+      }
 
       next(); // Lanjut ke controller berikutnya
     } catch (error) {
@@ -33,9 +37,9 @@ const protect = async (req, res, next) => {
 // Middleware opsional untuk membatasi akses berdasarkan role (misal: khusus pemilik)
 const authorize = (...roles) => {
   return (req, res, next) => {
-    if (!roles.includes(req.user.role)) {
+  if (!req.user || !roles.includes(req.user.role)) {
       return res.status(403).json({
-        message: `Role ${req.user.role} tidak memiliki akses ke rute ini`
+    message: 'Role tidak memiliki akses ke rute ini'
       });
     }
     next();

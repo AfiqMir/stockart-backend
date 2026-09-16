@@ -13,7 +13,14 @@ const generateToken = (id) => {
 // @route   POST /api/auth/register
 exports.registerUser = async (req, res) => {
   try {
-    const { nama, username, password, role } = req.body;
+    const { nama, username, password } = req.body;
+
+    if (!nama || !username || !password) {
+      return res.status(400).json({
+        success: false,
+        message: 'Nama, username, dan password wajib diisi'
+      });
+    }
 
     // 1. Cek apakah username sudah terdaftar
     const userExists = await User.findOne({ username });
@@ -30,7 +37,7 @@ exports.registerUser = async (req, res) => {
       nama,
       username,
       password: hashedPassword,
-      role: role || 'kasir'
+      role: 'kasir'
     });
 
     // 4. Kirim respon sukses beserta token
@@ -55,6 +62,13 @@ exports.registerUser = async (req, res) => {
 exports.loginUser = async (req, res) => {
   try {
     const { username, password } = req.body;
+
+    if (!username || !password) {
+      return res.status(400).json({
+        success: false,
+        message: 'Username dan password wajib diisi'
+      });
+    }
 
     // 1. Cari user berdasarkan username
     const user = await User.findOne({ username });
