@@ -9,10 +9,10 @@ Commit basis terbaru: `f29c394` (`origin/main`)
 | Anggota | Modul | Status | Catatan |
 | --- | --- | --- | --- |
 | Afiq | Fondasi Express, MongoDB, dan User schema | Selesai | Sudah masuk ke `main`. |
-| Afiq | Register, bcrypt, login, JWT, dan middleware role | Selesai dengan hardening lokal | Perubahan terbaru belum dipush. Register publik sekarang selalu membuat role `kasir`. |
+| Afiq | Register, bcrypt, login, JWT, dan middleware role | Selesai dengan hardening | Register publik sekarang selalu membuat role `kasir`. |
 | Afiq | Proteksi route Product dan Transaction | Terintegrasi | Route pada `main` sudah memakai `protect` dan `authorize`. |
 | Afiq | Pengujian RBAC | Selesai untuk skenario dasar | 4 test Node bawaan lulus. Cakupan masih perlu diperluas ke request HTTP dan database. |
-| Afiq | Staging/deployment | Konfigurasi awal selesai | `render.yaml` sudah dibuat. Service dan environment variables masih perlu dibuat di dashboard Render. |
+| Afiq | Staging/deployment | CI selesai, staging belum aktif | GitHub Actions, `render.yaml`, `.env.example`, dan `CORS_ORIGIN` sudah disiapkan. Service dan environment variables masih perlu dibuat di dashboard Render. |
 | Bgs | Product schema | Selesai | Mencakup nama, kode produk, kategori, harga, stok, satuan, stok minimum, deskripsi, dan status aktif. |
 | Bgs | CRUD Product | Selesai | GET list, GET detail, POST, PUT, dan DELETE tersedia. POST/PUT/DELETE dibatasi untuk `pemilik`. |
 | Bgs | Restock, low-stock, pencarian, dan filter | Belum terlihat | Belum tersedia pada branch `main` saat pemeriksaan. |
@@ -33,6 +33,9 @@ Commit basis terbaru: `f29c394` (`origin/main`)
 - Menambahkan `npm test` menggunakan Node test runner.
 - Menambahkan test dasar untuk role `pemilik`, `kasir`, dan request tanpa user.
 - Menambahkan konfigurasi awal Render melalui `render.yaml`.
+- Menambahkan GitHub Actions untuk menjalankan `npm ci` dan `npm test` pada push/pull request.
+- Menambahkan konfigurasi `CORS_ORIGIN` berbasis environment.
+- Menambahkan template environment variables melalui `.env.example`.
 
 ## Validasi Terakhir
 
@@ -45,27 +48,23 @@ node --check app.js
 node --check controllers/authController.js
 node --check middleware/authMiddleware.js
 git diff --check
+GitHub Actions workflow: `.github/workflows/ci.yml`
 ```
 
 ## Langkah Berikutnya
 
-1. Review perubahan Afiq lalu commit dan push ke branch pribadi.
-2. Tambahkan test HTTP untuk endpoint Product dan Transaction dengan token kasir serta pemilik.
-3. Tentukan mekanisme pembuatan akun pemilik, misalnya seed script atau endpoint pemilik yang sudah terproteksi.
-4. Bgs menyelesaikan restock, low-stock, pencarian, filter, dan pencegahan stok negatif.
-5. Ocha mengimplementasikan checkout atomik: validasi stok, pengurangan stok, dan rollback saat gagal.
-6. Ocha menambahkan filter riwayat transaksi serta pengembalian stok saat void.
-7. Izzy membuat endpoint summary, revenue, dan top-products beserta aggregation test.
-8. Tambahkan validasi request dan dokumentasikan kontrak response API.
-9. Buat service Render, lalu isi `MONGO_URI` dan `JWT_SECRET` melalui environment variables dashboard, bukan file repository.
-10. Jalankan smoke test staging dari login sampai checkout dan void sebelum deployment production.
+1. Tambahkan test HTTP untuk endpoint Product dan Transaction dengan token kasir serta pemilik.
+2. Tentukan mekanisme pembuatan akun pemilik, misalnya seed script atau endpoint pemilik yang sudah terproteksi.
+3. Bgs menyelesaikan restock, low-stock, pencarian, filter, dan pencegahan stok negatif.
+4. Ocha mengimplementasikan checkout atomik: validasi stok, pengurangan stok, dan rollback saat gagal.
+5. Ocha menambahkan filter riwayat transaksi serta pengembalian stok saat void.
+6. Izzy membuat endpoint summary, revenue, dan top-products beserta aggregation test.
+7. Tambahkan validasi request dan dokumentasikan kontrak response API.
+8. Buat service Render, lalu isi `MONGO_URI`, `JWT_SECRET`, dan `CORS_ORIGIN` melalui environment variables dashboard.
+9. Jalankan smoke test staging dari login sampai checkout dan void sebelum deployment production.
 
 ## Perintah Commit dan Push
 
-```powershell
-git add .
-git commit -m "fix: harden auth and add RBAC tests"
-git push origin afiq/auth-setup
-```
+Perubahan CI dan CORS berikutnya perlu di-commit dan di-push setelah review lokal.
 
 `PROGRESS.md` sengaja mencatat konfigurasi deployment tanpa nilai secret. Secret hanya boleh disimpan pada environment variables server deployment dan file `.env` lokal.
