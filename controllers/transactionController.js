@@ -159,14 +159,7 @@ exports.createTransaction = async (req, res) => {
 // PATCH /api/transactions/:id/cancel
 exports.cancelTransaction = async (req, res) => {
   try {
-    const transaction = await Transaction.findByIdAndUpdate(
-      req.params.id,
-      { status: 'batal' },
-      {
-        new: true,
-        runValidators: true,
-      }
-    );
+    const transaction = await Transaction.findByIdAndDelete(req.params.id);
 
     if (!transaction) {
       return res.status(404).json({
@@ -177,7 +170,7 @@ exports.cancelTransaction = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: 'Transaksi berhasil dibatalkan',
+      message: 'Transaksi berhasil dibatalkan dan dihapus',
       data: transaction,
     });
   } catch (error) {
