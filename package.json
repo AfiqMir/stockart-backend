@@ -9,7 +9,7 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": "",
+  "description": "Web-based POS &amp; Inventory System for retail storefronts. Built with ExpressJS, MongoDB, and React/Next.js.",
   "dependencies": {
     "bcryptjs": "^3.0.3",
     "cors": "^2.8.6",
@@ -20,5 +20,14 @@
   },
   "devDependencies": {
     "nodemon": "^3.1.14"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AfiqMir/stockart-backend.git"
+  },
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/AfiqMir/stockart-backend/issues"
+  },
+  "homepage": "https://github.com/AfiqMir/stockart-backend#readme"
 }
