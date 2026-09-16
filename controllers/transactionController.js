@@ -8,13 +8,25 @@ const calculateTransactionDetail = async (detailBarang) => {
     throw error;
   }
 
+  const productIds = detailBarang.map((item) => item.produk);
+
+  if (productIds.some((produk) => !produk)) {
+    const error = new Error('Produk harus diisi di setiap detail barang');
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const products = await Product.find({ _id: { $in: productIds } });
+  const productMap = new Map(
+    products.map((product) => [product._id.toString(), product])
+  );
   const calculatedDetailBarang = [];
 
   for (const item of detailBarang) {
-    const product = await Product.findById(item.produk);
+    const product = productMap.get(item.produk.toString());
 
     if (!product) {
-      const error = new Error('Produk tidak ditemukan');
+      const error = new Error(`Produk dengan ID ${item.produk} tidak ditemukan`);
       error.statusCode = 404;
       throw error;
     }
