@@ -24,7 +24,9 @@ dotenv.config();
 
 const mongoose = require('mongoose');
 const http = require('node:http');
+const bcrypt = require('bcryptjs');
 const app = require('../app');
+const User = require('../models/User');
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
@@ -79,10 +81,9 @@ async function login(baseUrl, username, password) {
 
 // ─── Kredensial ─────────────────────────────────────────────────────────────
 
-const PEMILIK_USERNAME = process.env.PEMILIK_USERNAME || 'pemilik';
-const PEMILIK_PASSWORD = process.env.PEMILIK_PASSWORD || 'gantidulu123';
-
-// Kasir sementara — dibuat di test setup dan dihapus setelah selesai
+// User sementara — dibuat di test setup dan dihapus di teardown
+const PEMILIK_TEST_USERNAME = `pemilik_test_${Date.now()}`;
+const PEMILIK_TEST_PASSWORD = 'pemilikPassword123';
 const KASIR_TEST_USERNAME = `kasir_test_${Date.now()}`;
 const KASIR_TEST_PASSWORD = 'testPassword123';
 
@@ -95,9 +96,18 @@ let tokenKasir;
 let createdProductId;    // ID produk yang dibuat selama test
 let createdTransactionId; // ID transaksi yang dibuat selama test
 
-// Setup: jalankan server, daftarkan kasir sementara, login keduanya
+// Setup: jalankan server, buat user pemilik & kasir sementara, login keduanya
 test('Setup: server & autentikasi', async () => {
   ({ server, baseUrl } = await startServer());
+
+  // Buat akun pemilik sementara langsung di DB
+  const hashedPemilikPassword = await bcrypt.hash(PEMILIK_TEST_PASSWORD, 10);
+  await User.create({
+    nama: 'Pemilik Test',
+    username: PEMILIK_TEST_USERNAME,
+    password: hashedPemilikPassword,
+    role: 'pemilik',
+  });
 
   // Daftarkan kasir sementara (register publik selalu jadi kasir)
   const { status: regStatus, body: regBody } = await req(
@@ -110,7 +120,7 @@ test('Setup: server & autentikasi', async () => {
   tokenKasir = regBody.data.token;
 
   // Login pemilik
-  tokenPemilik = await login(baseUrl, PEMILIK_USERNAME, PEMILIK_PASSWORD);
+  tokenPemilik = await login(baseUrl, PEMILIK_TEST_USERNAME, PEMILIK_TEST_PASSWORD);
 });
 
 // ─── Product Tests ───────────────────────────────────────────────────────────
@@ -370,8 +380,8 @@ test('Teardown: hapus data test & tutup server', async () => {
     });
   }
 
-  // Hapus user kasir sementara langsung via Mongoose
-  const User = require('../models/User');
+  // Hapus user test sementara langsung via Mongoose
+  await User.deleteOne({ username: PEMILIK_TEST_USERNAME });
   await User.deleteOne({ username: KASIR_TEST_USERNAME });
 
   await stopServer(server);
