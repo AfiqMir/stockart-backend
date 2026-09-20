@@ -25,3 +25,7 @@ jobs:
 
       - name: Run tests
         run: npm test
+        env:
+          MONGO_URI: ${{ secrets.MONGO_URI }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          PEMILIK_PASSWORD: ${{ secrets.PEMILIK_PASSWORD }}
