@@ -9,18 +9,16 @@ const {
   cancelTransaction,
 } = require('../controllers/transactionController');
 
-const {
-  protect,
-  authorize,
-} = require('../middleware/authMiddleware');
+const { protect, authorize } = require('../middleware/authMiddleware');
+const { validate, transactionRules } = require('../middleware/validate');
 
 // Owner dan cashier dapat melihat transaksi
 router.get('/', protect, getTransactions);
 router.get('/:id', protect, getTransactionById);
 
 // Cashier dan owner dapat menghitung draft dan membuat transaksi
-router.post('/draft', protect, authorize('kasir', 'pemilik'), draftTransaction);
-router.post('/', protect, authorize('kasir', 'pemilik'), createTransaction);
+router.post('/draft', protect, authorize('kasir', 'pemilik'), validate(transactionRules), draftTransaction);
+router.post('/', protect, authorize('kasir', 'pemilik'), validate(transactionRules), createTransaction);
 
 // Hanya owner yang dapat membatalkan transaksi
 router.patch('/:id/cancel', protect, authorize('pemilik'), cancelTransaction);
