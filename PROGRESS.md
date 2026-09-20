@@ -35,6 +35,9 @@ Commit basis terbaru: `4a3bf47` (`origin/main`)
 - Menambahkan test unit RBAC untuk role `pemilik`, `kasir`, dan request tanpa user.
 - Menambahkan `scripts/seed.js` untuk membuat akun `pemilik` pertama (aman dijalankan berulang kali; username/password dapat dikustomisasi via env).
 - Menambahkan `test/http.test.js` — 17 HTTP integration test yang mencakup seluruh endpoint Product dan Transaction dengan token kasir dan pemilik, termasuk verifikasi RBAC (403) dan auto-cleanup data test.
+- Menambahkan `middleware/validate.js` — middleware validasi body request per endpoint (register, login, product, transaction) dengan response error 400 yang deskriptif.
+- Menambahkan `middleware/rateLimiter.js` — rate limiter auth (max 10 req/IP/15 menit) untuk mencegah brute-force.
+- Menambahkan 8 test validasi gagal ke `test/http.test.js` (total 25 HTTP test, 29 test keseluruhan).
 - Menambahkan konfigurasi awal Render melalui `render.yaml`.
 - Menambahkan GitHub Actions untuk menjalankan `npm ci` dan `npm test` pada push/pull request.
 - Menambahkan konfigurasi `CORS_ORIGIN` berbasis environment.
@@ -44,9 +47,11 @@ Commit basis terbaru: `4a3bf47` (`origin/main`)
 
 ```text
 npm test
-21 tests passed, 0 failed
+29 tests passed, 0 failed
   4  unit test RBAC          (test/rbac.test.js)
-  17 HTTP integration test   (test/http.test.js)
+  25 HTTP integration test   (test/http.test.js)
+     - 17 RBAC & happy path
+     -  8 validasi input gagal
 
 node scripts/seed.js
 Akun pemilik "pemilik" berhasil dibuat (2026-09-20)
@@ -65,7 +70,7 @@ GitHub Actions workflow: .github/workflows/ci.yml
 2. Ocha mengimplementasikan checkout atomik: validasi stok, pengurangan stok, dan rollback saat gagal.
 3. Ocha menambahkan filter riwayat transaksi serta pengembalian stok saat void/cancel.
 4. Izzy membuat endpoint summary, revenue, dan top-products beserta aggregation test.
-5. Tambahkan validasi request dan dokumentasikan kontrak response API.
+5. ~~Tambahkan validasi request dan dokumentasikan kontrak response API.~~ ✅ Selesai (validate.js + rateLimiter.js).
 6. Buat service Render, lalu isi `MONGO_URI`, `JWT_SECRET`, dan `CORS_ORIGIN` melalui environment variables dashboard.
 7. Jalankan smoke test staging dari login sampai checkout dan void sebelum deployment production.
 

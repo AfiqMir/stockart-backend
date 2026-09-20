@@ -287,6 +287,79 @@ test('PATCH /api/transactions/:id/cancel — pemilik BISA cancel transaksi (200)
   assert.equal(body.success, true);
 });
 
+// ─── Validation Tests ────────────────────────────────────────────────────────
+
+test('POST /api/auth/register — password kurang dari 8 karakter ditolak (400)', async () => {
+  const { status, body } = await req(baseUrl, 'POST', '/api/auth/register', {
+    body: { nama: 'Test', username: 'testuser123', password: 'abc' },
+  });
+  assert.equal(status, 400, JSON.stringify(body));
+  assert.equal(body.success, false);
+  assert.ok(Array.isArray(body.errors), 'harus ada array errors');
+  assert.ok(body.errors.some((e) => e.includes('password')));
+});
+
+test('POST /api/auth/register — username tidak valid (spasi/simbol) ditolak (400)', async () => {
+  const { status, body } = await req(baseUrl, 'POST', '/api/auth/register', {
+    body: { nama: 'Test', username: 'user name!', password: 'password123' },
+  });
+  assert.equal(status, 400, JSON.stringify(body));
+  assert.ok(body.errors.some((e) => e.includes('username')));
+});
+
+test('POST /api/auth/register — tanpa field wajib ditolak (400)', async () => {
+  const { status, body } = await req(baseUrl, 'POST', '/api/auth/register', {
+    body: {},
+  });
+  assert.equal(status, 400, JSON.stringify(body));
+  assert.ok(body.errors.length >= 3, 'harus ada 3 error (nama, username, password)');
+});
+
+test('POST /api/auth/login — tanpa body ditolak (400)', async () => {
+  const { status, body } = await req(baseUrl, 'POST', '/api/auth/login', {
+    body: {},
+  });
+  assert.equal(status, 400, JSON.stringify(body));
+  assert.ok(body.errors.length >= 2, 'harus ada error username dan password');
+});
+
+test('POST /api/products — tanpa kodeProduk ditolak (400)', async () => {
+  const { status, body } = await req(baseUrl, 'POST', '/api/products', {
+    token: tokenPemilik,
+    body: { nama: 'Produk Tanpa Kode', hargaBeli: 1000, hargaJual: 2000 },
+  });
+  assert.equal(status, 400, JSON.stringify(body));
+  assert.ok(body.errors.some((e) => e.includes('kodeProduk')));
+});
+
+test('POST /api/products — hargaJual negatif ditolak (400)', async () => {
+  const { status, body } = await req(baseUrl, 'POST', '/api/products', {
+    token: tokenPemilik,
+    body: { nama: 'Test', kodeProduk: 'KODE-NEG', hargaBeli: 1000, hargaJual: -500 },
+  });
+  assert.equal(status, 400, JSON.stringify(body));
+  assert.ok(body.errors.some((e) => e.includes('hargaJual')));
+});
+
+test('POST /api/transactions — detailBarang kosong ditolak (400)', async () => {
+  const { status, body } = await req(baseUrl, 'POST', '/api/transactions', {
+    token: tokenKasir,
+    body: { detailBarang: [] },
+  });
+  assert.equal(status, 400, JSON.stringify(body));
+  assert.ok(body.errors.some((e) => e.includes('detailBarang')));
+});
+
+test('POST /api/transactions — jumlah item 0 ditolak (400)', async () => {
+  assert.ok(createdProductId);
+  const { status, body } = await req(baseUrl, 'POST', '/api/transactions', {
+    token: tokenKasir,
+    body: { detailBarang: [{ produk: createdProductId, jumlah: 0 }] },
+  });
+  assert.equal(status, 400, JSON.stringify(body));
+  assert.ok(body.errors.some((e) => e.includes('jumlah')));
+});
+
 // ─── Teardown ────────────────────────────────────────────────────────────────
 
 test('Teardown: hapus data test & tutup server', async () => {
