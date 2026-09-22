@@ -3,17 +3,36 @@ const Product = require('../models/Product');
 
 const getSummary = async (req, res) => {
     try {
+        const { tanggalMulai, tanggalAkhir } = req.query;
+
+        const filterTransaksi = {
+            status: 'selesai'
+        };
+
+        if (tanggalMulai || tanggalAkhir) {
+            filterTransaksi.createdAt = {};
+
+            if (tanggalMulai) {
+                filterTransaksi.createdAt.$gte = new Date(tanggalMulai);
+            }
+
+            if (tanggalAkhir) {
+                const akhir = new Date(tanggalAkhir);
+                akhir.setHours(23, 59, 59, 999);
+
+                filterTransaksi.createdAt.$lte = akhir;
+            }
+        }
+
         const totalProduk = await Product.countDocuments();
 
-        const totalTransaksi = await Transaction.countDocuments({
-            status: 'selesai'
-        });
+        const totalTransaksi = await Transaction.countDocuments(
+            filterTransaksi
+        );
 
         const hasilOmzet = await Transaction.aggregate([
             {
-                $match: {
-                    status: 'selesai'
-                }
+                $match: filterTransaksi
             },
             {
                 $group: {
@@ -38,6 +57,7 @@ const getSummary = async (req, res) => {
                 totalOmzet
             }
         });
+
     } catch (error) {
         res.status(500).json({
             success: false,
@@ -49,11 +69,30 @@ const getSummary = async (req, res) => {
 
 const getRevenue = async (req, res) => {
     try {
+        const { tanggalMulai, tanggalAkhir } = req.query;
+
+        const filterTransaksi = {
+            status: 'selesai'
+        };
+
+        if (tanggalMulai || tanggalAkhir) {
+            filterTransaksi.createdAt = {};
+
+            if (tanggalMulai) {
+                filterTransaksi.createdAt.$gte = new Date(tanggalMulai);
+            }
+
+            if (tanggalAkhir) {
+                const akhir = new Date(tanggalAkhir);
+                akhir.setHours(23, 59, 59, 999);
+
+                filterTransaksi.createdAt.$lte = akhir;
+            }
+        }
+
         const hasil = await Transaction.aggregate([
             {
-                $match: {
-                    status: 'selesai'
-                }
+                $match: filterTransaksi
             },
             {
                 $group: {
@@ -88,6 +127,7 @@ const getRevenue = async (req, res) => {
             success: true,
             data
         });
+
     } catch (error) {
         res.status(500).json({
             success: false,
@@ -99,10 +139,80 @@ const getRevenue = async (req, res) => {
 
 const getTopProducts = async (req, res) => {
     try {
+        const { tanggalMulai, tanggalAkhir } = req.query;
+
+        const filterTransaksi = {
+            status: 'selesai'
+        };
+
+        if (tanggalMulai || tanggalAkhir) {
+            filterTransaksi.createdAt = {};
+
+            if (tanggalMulai) {
+                filterTransaksi.createdAt.$gte = new Date(tanggalMulai);
+            }
+
+            if (tanggalAkhir) {
+                const akhir = new Date(tanggalAkhir);
+                akhir.setHours(23, 59, 59, 999);
+
+                filterTransaksi.createdAt.$lte = akhir;
+            }
+        }
+
+        const hasil = await Transaction.aggregate([
+            {
+                $match: filterTransaksi
+            },
+            {
+                $unwind: '$detailBarang'
+            },
+            {
+                $group: {
+                    _id: '$detailBarang.produk',
+                    totalTerjual: {
+                        $sum: '$detailBarang.jumlah'
+                    },
+                    totalPendapatan: {
+                        $sum: '$detailBarang.subtotal'
+                    }
+                }
+            },
+            {
+                $sort: {
+                    totalTerjual: -1
+                }
+            },
+            {
+                $limit: 5
+            },
+            {
+                $lookup: {
+                    from: 'products',
+                    localField: '_id',
+                    foreignField: '_id',
+                    as: 'produk'
+                }
+            },
+            {
+                $unwind: '$produk'
+            },
+            {
+                $project: {
+                    _id: 0,
+                    produkId: '$_id',
+                    namaProduk: '$produk.nama',
+                    totalTerjual: 1,
+                    totalPendapatan: 1
+                }
+            }
+        ]);
+
         res.status(200).json({
             success: true,
-            data: []
+            data: hasil
         });
+
     } catch (error) {
         res.status(500).json({
             success: false,
