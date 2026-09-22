@@ -10,10 +10,11 @@ Commit basis terbaru: `4a3bf47` (`origin/main`)
 | --- | --- | --- | --- |
 | Afiq | Fondasi Express, MongoDB, dan User schema | Selesai | Sudah masuk ke `main`. |
 | Afiq | Register, bcrypt, login, JWT, dan middleware role | Selesai dengan hardening | Register publik sekarang selalu membuat role `kasir`. |
-| Afiq | Proteksi route Product dan Transaction | Terintegrasi | Route pada `main` sudah memakai `protect` dan `authorize`. |
+| Afiq | Proteksi route Product, Transaction, dan Report | Selesai | Seluruh rute API (termasuk Report dari Izzy) sudah terproteksi JWT & RBAC (`pemilik`/`kasir`). |
 | Afiq | Seed script akun pemilik | Selesai | `scripts/seed.js` untuk membuat akun pemilik pertama. Aman dijalankan berulang kali. |
-| Afiq | Pengujian RBAC dan HTTP Test | Selesai | 21 test lulus: 4 unit RBAC + 17 HTTP integration test endpoint Product & Transaction. |
-| Afiq | Staging/deployment | CI selesai, staging belum aktif | GitHub Actions, `render.yaml`, `.env.example`, dan `CORS_ORIGIN` sudah disiapkan. Service dan environment variables masih perlu dibuat di dashboard Render. |
+| Afiq | Pengujian RBAC dan HTTP Test | Selesai | 34 test lulus: 4 unit RBAC + 30 HTTP integration test (Product, Transaction, Report, & Validasi Input). |
+| Afiq | Dokumentasi API & Postman Collection | Selesai | `StockArt_API.postman_collection.json` v2.1 dan panduan `API_TESTING.md` siap pakai. |
+| Afiq | Staging/deployment | CI selesai, staging siap deploy | GitHub Actions, `render.yaml`, `.env.example`, dan `CORS_ORIGIN` sudah disiapkan. Siap dihubungkan ke dashboard Render. |
 | Bgs | Product schema | Selesai | Mencakup nama, kode produk, kategori, harga, stok, satuan, stok minimum, deskripsi, dan status aktif. |
 | Bgs | CRUD Product | Selesai | GET list, GET detail, POST, PUT, dan DELETE tersedia. POST/PUT/DELETE dibatasi untuk `pemilik`. |
 | Bgs | Restock, low-stock, pencarian, dan filter | Belum terlihat | Belum tersedia pada branch `main` saat pemeriksaan. |

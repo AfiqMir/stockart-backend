@@ -297,6 +297,49 @@ test('PATCH /api/transactions/:id/cancel — pemilik BISA cancel transaksi (200)
   assert.equal(body.success, true);
 });
 
+// ─── Report Tests ────────────────────────────────────────────────────────────
+
+test('GET /api/reports/summary — tanpa token ditolak (401)', async () => {
+  const { status } = await req(baseUrl, 'GET', '/api/reports/summary');
+  assert.equal(status, 401);
+});
+
+test('GET /api/reports/summary — kasir TIDAK BISA akses laporan (403)', async () => {
+  const { status } = await req(baseUrl, 'GET', '/api/reports/summary', {
+    token: tokenKasir,
+  });
+  assert.equal(status, 403);
+});
+
+test('GET /api/reports/summary — pemilik BISA akses ringkasan laporan (200)', async () => {
+  const { status, body } = await req(baseUrl, 'GET', '/api/reports/summary', {
+    token: tokenPemilik,
+  });
+  assert.equal(status, 200, JSON.stringify(body));
+  assert.equal(body.success, true);
+  assert.ok(typeof body.data.totalProduk === 'number');
+  assert.ok(typeof body.data.totalTransaksi === 'number');
+  assert.ok(typeof body.data.totalOmzet === 'number');
+});
+
+test('GET /api/reports/revenue — pemilik BISA akses laporan omzet (200)', async () => {
+  const { status, body } = await req(baseUrl, 'GET', '/api/reports/revenue', {
+    token: tokenPemilik,
+  });
+  assert.equal(status, 200, JSON.stringify(body));
+  assert.equal(body.success, true);
+  assert.ok(Array.isArray(body.data));
+});
+
+test('GET /api/reports/top-products — pemilik BISA akses laporan top products (200)', async () => {
+  const { status, body } = await req(baseUrl, 'GET', '/api/reports/top-products', {
+    token: tokenPemilik,
+  });
+  assert.equal(status, 200, JSON.stringify(body));
+  assert.equal(body.success, true);
+  assert.ok(Array.isArray(body.data));
+});
+
 // ─── Validation Tests ────────────────────────────────────────────────────────
 
 test('POST /api/auth/register — password kurang dari 8 karakter ditolak (400)', async () => {
