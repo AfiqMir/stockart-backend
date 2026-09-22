@@ -197,18 +197,54 @@ Endpoint ini membatalkan transaksi dengan cara menghapus data transaksi dari dat
 
 ```bash
 curl -X PATCH http://localhost:5000/api/transactions/6aaa0956c41db778cffd8820/cancel \
-  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhYTlmMWYyYzQxZGI3NzhjZmZkODgxYyIsImlhdCI6MTc4OTUyOTQyOSwiZXhwIjoxNzg5NjE1ODI5fQ.eFTg3XkgDCoqSDC59LyAYzUIgD73EVoua72yylPyjY8"
+  -H "Authorization: Bearer $TOKEN"
 ```
 
-## 4. Contoh Alur Test Cepat
+## 4. Reports (Hanya Pemilik)
+
+### Get Summary
+
+```bash
+curl -X GET http://localhost:5000/api/reports/summary \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Get Revenue (Omzet Harian)
+
+```bash
+curl -X GET http://localhost:5000/api/reports/revenue \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Get Top Products (Produk Terlaris)
+
+```bash
+curl -X GET http://localhost:5000/api/reports/top-products \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+---
+
+## 5. Postman Collection
+
+File Postman Collection v2.1 telah disediakan di root proyek:
+- File: `StockArt_API.postman_collection.json`
+
+### Cara Penggunaan:
+1. Buka aplikasi **Postman**.
+2. Klik tombol **Import**, lalu pilih file `StockArt_API.postman_collection.json`.
+3. Buka request `1. Auth > Login Pemilik` atau `Login Kasir`, lalu klik **Send**.
+4. Token JWT akan otomatis tersimpan ke variabel environment Postman dan siap digunakan untuk seluruh endpoint lainnya.
+
+---
+
+## 6. Contoh Alur Test Cepat
 
 1. Jalankan `npm run dev`
-2. Register user role `pemilik`
-3. Login sebagai `pemilik`
-4. Simpan token ke variable `TOKEN`
-5. Create product
-6. Simpan id produk ke variable `PRODUCT_ID`
-7. Test draft transaction
-8. Create transaction
-9. Simpan id transaksi ke variable `TRANSACTION_ID`
-10. Test get all, get by id, dan cancel transaction
+2. Jalankan `node scripts/seed.js` untuk membuat akun pemilik default.
+3. Login sebagai `pemilik` via `/api/auth/login` dan simpan token ke variable `TOKEN`.
+4. Tambah produk (`POST /api/products`) dan simpan ID ke `PRODUCT_ID`.
+5. Login sebagai `kasir` via `/api/auth/login`.
+6. Kasir membuat transaksi checkout (`POST /api/transactions`).
+7. Pemilik mengecek laporan ringkasan (`GET /api/reports/summary`) dan omzet (`GET /api/reports/revenue`).
+
