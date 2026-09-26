@@ -3,7 +3,28 @@ const Product = require('../models/Product');
 // GET /api/products
 exports.getProducts = async (req, res) => {
   try {
-    const products = await Product.find().sort({ createdAt: -1 });
+    const { search, kategori, barcode } = req.query;
+    
+    let query = {};
+    
+    // Exact match untuk alat barcode scanner (sangat cepat karena menggunakan index database)
+    if (barcode) {
+      query.kodeProduk = barcode;
+    }
+    
+    // Partial match untuk pencarian manual (ketik nama/kode)
+    if (search) {
+      query.$or = [
+        { nama: { $regex: search, $options: 'i' } },
+        { kodeProduk: { $regex: search, $options: 'i' } }
+      ];
+    }
+    
+    if (kategori) {
+      query.kategori = { $regex: kategori, $options: 'i' };
+    }
+
+    const products = await Product.find(query).sort({ createdAt: -1 });
 
     res.status(200).json({
       success: true,
@@ -13,6 +34,26 @@ exports.getProducts = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Gagal mengambil data produk',
+      error: error.message,
+    });
+  }
+};
+
+// GET /api/products/low-stock
+exports.getLowStockProducts = async (req, res) => {
+  try {
+    const products = await Product.find({
+      $expr: { $lte: ['$stok', '$stokMinimum'] }
+    }).sort({ stok: 1 });
+
+    res.status(200).json({
+      success: true,
+      data: products,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Gagal mengambil data produk stok menipis',
       error: error.message,
     });
   }
@@ -117,3 +158,35 @@ exports.deleteProduct = async (req, res) => {
     });
   }
 };
+
+// PATCH /api/products/:id/restock
+exports.restockProduct = async (req, res) => {
+  try {
+    const { jumlah } = req.body;
+    
+    const product = await Product.findByIdAndUpdate(
+      req.params.id,
+      { $inc: { stok: Number(jumlah) } },
+      { new: true, runValidators: true }
+    );
+
+    if (!product) {
+      return res.status(404).json({
+        success: false,
+        message: 'Produk tidak ditemukan',
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Stok berhasil ditambahkan',
+      data: product,
+    });
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      message: 'Gagal menambahkan stok',
+      error: error.message,
+    });
+  }
+};

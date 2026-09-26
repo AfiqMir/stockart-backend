@@ -155,6 +155,22 @@ const transactionRules = (body) => {
   return errors;
 };
 
+/**
+ * PATCH /api/products/:id/restock
+ * { jumlah }
+ */
+const restockRules = (body) => {
+  const errors = [];
+
+  if (body.jumlah === undefined || body.jumlah === null) {
+    errors.push('jumlah wajib diisi');
+  } else if (!isPositiveNumber(Number(body.jumlah)) || Number(body.jumlah) === 0) {
+    errors.push('jumlah harus berupa angka positif dan lebih dari 0');
+  }
+
+  return errors;
+};
+
 // ─── Middleware pabrik ────────────────────────────────────────────────────────
 
 /**
@@ -185,4 +201,5 @@ module.exports = {
   productRules,
   productUpdateRules,
   transactionRules,
+  restockRules,
 };
