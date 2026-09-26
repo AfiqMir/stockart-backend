@@ -38,8 +38,14 @@
 						},
 						"url": {
 							"raw": "{{base_url}}/api/auth/register",
-							"host": ["{{base_url}}"],
-							"path": ["api", "auth", "register"]
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"register"
+							]
 						},
 						"description": "Mendaftarkan user baru (otomatis mendapat role 'kasir')."
 					},
@@ -82,8 +88,14 @@
 						},
 						"url": {
 							"raw": "{{base_url}}/api/auth/login",
-							"host": ["{{base_url}}"],
-							"path": ["api", "auth", "login"]
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
 						},
 						"description": "Login sebagai akun Pemilik (token otomatis disimpan ke {{token}} dan {{token_pemilik}})."
 					},
@@ -126,8 +138,14 @@
 						},
 						"url": {
 							"raw": "{{base_url}}/api/auth/login",
-							"host": ["{{base_url}}"],
-							"path": ["api", "auth", "login"]
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
 						},
 						"description": "Login sebagai akun Kasir (token otomatis disimpan ke {{token}} dan {{token_kasir}})."
 					},
@@ -140,8 +158,14 @@
 						"header": [],
 						"url": {
 							"raw": "{{base_url}}/api/auth/me",
-							"host": ["{{base_url}}"],
-							"path": ["api", "auth", "me"]
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"me"
+							]
 						},
 						"description": "Mendapatkan profil user yang sedang login dari token JWT."
 					},
@@ -159,8 +183,13 @@
 						"header": [],
 						"url": {
 							"raw": "{{base_url}}/api/products",
-							"host": ["{{base_url}}"],
-							"path": ["api", "products"]
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"products"
+							]
 						},
 						"description": "Melihat daftar seluruh produk (Dapat diakses oleh Kasir & Pemilik)."
 					},
@@ -173,8 +202,14 @@
 						"header": [],
 						"url": {
 							"raw": "{{base_url}}/api/products/{{product_id}}",
-							"host": ["{{base_url}}"],
-							"path": ["api", "products", "{{product_id}}"]
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"products",
+								"{{product_id}}"
+							]
 						},
 						"description": "Melihat detail spesifik produk berdasarkan ID."
 					},
@@ -213,8 +248,13 @@
 						},
 						"url": {
 							"raw": "{{base_url}}/api/products",
-							"host": ["{{base_url}}"],
-							"path": ["api", "products"]
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"products"
+							]
 						},
 						"description": "Menambah produk baru ke database (Hanya role Pemilik)."
 					},
@@ -236,8 +276,14 @@
 						},
 						"url": {
 							"raw": "{{base_url}}/api/products/{{product_id}}",
-							"host": ["{{base_url}}"],
-							"path": ["api", "products", "{{product_id}}"]
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"products",
+								"{{product_id}}"
+							]
 						},
 						"description": "Memperbarui informasi produk (Hanya role Pemilik)."
 					},
@@ -250,10 +296,103 @@
 						"header": [],
 						"url": {
 							"raw": "{{base_url}}/api/products/{{product_id}}",
-							"host": ["{{base_url}}"],
-							"path": ["api", "products", "{{product_id}}"]
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"products",
+								"{{product_id}}"
+							]
 						},
 						"description": "Menghapus produk dari katalog (Hanya role Pemilik)."
+					},
+					"response": []
+				},
+				{
+					"name": "Search & Filter Products",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/products?search=indo",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"products"
+							],
+							"query": [
+								{
+									"key": "search",
+									"value": "indo",
+									"description": "Cari lewat nama/kode (Regex)"
+								},
+								{
+									"key": "kategori",
+									"value": "sembako",
+									"disabled": true
+								},
+								{
+									"key": "barcode",
+									"value": "12345",
+									"disabled": true,
+									"description": "Cari lewat exact barcode"
+								}
+							]
+						},
+						"description": "Mencari produk berdasarkan nama, kategori, atau barcode spesifik."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Low Stock Products",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/products/low-stock",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"products",
+								"low-stock"
+							]
+						},
+						"description": "Melihat daftar produk yang stoknya menipis (<= stokMinimum)."
+					},
+					"response": []
+				},
+				{
+					"name": "Restock Product (Pemilik Only)",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"jumlah\": 20\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/products/{{product_id}}/restock",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"products",
+								"{{product_id}}",
+								"restock"
+							]
+						},
+						"description": "Menambah stok produk secara aman dengan operasi $inc (Hanya role Pemilik)."
 					},
 					"response": []
 				}
@@ -278,8 +417,14 @@
 						},
 						"url": {
 							"raw": "{{base_url}}/api/transactions/draft",
-							"host": ["{{base_url}}"],
-							"path": ["api", "transactions", "draft"]
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"transactions",
+								"draft"
+							]
 						},
 						"description": "Menghitung subtotal dan total belanja tanpa membuat transaksi di database."
 					},
@@ -318,8 +463,13 @@
 						},
 						"url": {
 							"raw": "{{base_url}}/api/transactions",
-							"host": ["{{base_url}}"],
-							"path": ["api", "transactions"]
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"transactions"
+							]
 						},
 						"description": "Menyimpan transaksi baru (Dapat dilakukan oleh Kasir & Pemilik)."
 					},
@@ -332,8 +482,13 @@
 						"header": [],
 						"url": {
 							"raw": "{{base_url}}/api/transactions",
-							"host": ["{{base_url}}"],
-							"path": ["api", "transactions"]
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"transactions"
+							]
 						},
 						"description": "Melihat seluruh riwayat transaksi."
 					},
@@ -346,8 +501,14 @@
 						"header": [],
 						"url": {
 							"raw": "{{base_url}}/api/transactions/{{transaction_id}}",
-							"host": ["{{base_url}}"],
-							"path": ["api", "transactions", "{{transaction_id}}"]
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"transactions",
+								"{{transaction_id}}"
+							]
 						},
 						"description": "Melihat rincian detail struk transaksi berdasarkan ID."
 					},
@@ -360,8 +521,15 @@
 						"header": [],
 						"url": {
 							"raw": "{{base_url}}/api/transactions/{{transaction_id}}/cancel",
-							"host": ["{{base_url}}"],
-							"path": ["api", "transactions", "{{transaction_id}}", "cancel"]
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"transactions",
+								"{{transaction_id}}",
+								"cancel"
+							]
 						},
 						"description": "Membatalkan/menghapus transaksi (Hanya role Pemilik)."
 					},
@@ -379,8 +547,14 @@
 						"header": [],
 						"url": {
 							"raw": "{{base_url}}/api/reports/summary",
-							"host": ["{{base_url}}"],
-							"path": ["api", "reports", "summary"]
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"reports",
+								"summary"
+							]
 						},
 						"description": "Mendapatkan ringkasan metrik statistik utama toko (Hanya role Pemilik)."
 					},
@@ -393,8 +567,14 @@
 						"header": [],
 						"url": {
 							"raw": "{{base_url}}/api/reports/revenue",
-							"host": ["{{base_url}}"],
-							"path": ["api", "reports", "revenue"]
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"reports",
+								"revenue"
+							]
 						},
 						"description": "Laporan pendapatan/omzet yang dikelompokkan per tanggal (Hanya role Pemilik)."
 					},
@@ -407,8 +587,14 @@
 						"header": [],
 						"url": {
 							"raw": "{{base_url}}/api/reports/top-products",
-							"host": ["{{base_url}}"],
-							"path": ["api", "reports", "top-products"]
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"reports",
+								"top-products"
+							]
 						},
 						"description": "Laporan daftar produk dengan penjualan terbanyak (Hanya role Pemilik)."
 					},
