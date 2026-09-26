@@ -20,11 +20,8 @@
 			"name": "1. Auth",
 			"item": [
 				{
-					"name": "Register Kasir (Publik)",
+					"name": "Register Kasir Baru (Pemilik Only)",
 					"request": {
-						"auth": {
-							"type": "noauth"
-						},
 						"method": "POST",
 						"header": [
 							{
@@ -47,7 +44,7 @@
 								"register"
 							]
 						},
-						"description": "Mendaftarkan user baru (otomatis mendapat role 'kasir')."
+						"description": "Mendaftarkan user kasir baru oleh Pemilik Toko (wajib token pemilik)."
 					},
 					"response": []
 				},
